@@ -1,0 +1,9 @@
+[package]
+name = "tenant-boundary-kit"
+version = "0.1.0"
+edition = "2021"
+description = "Fail-closed tenant boundary checks for agent tool calls"
+license = "MIT"
+
+[dev-dependencies]
+proptest = "1"
