@@ -1,6 +1,8 @@
 # TenantInvariant
 
 [![CI](https://github.com/subaru-hello/tenant-invariant/actions/workflows/ci.yml/badge.svg)](https://github.com/subaru-hello/tenant-invariant/actions/workflows/ci.yml)
+[![crates.io](https://img.shields.io/crates/v/tenant-invariant.svg)](https://crates.io/crates/tenant-invariant)
+[![downloads](https://img.shields.io/crates/d/tenant-invariant.svg)](https://crates.io/crates/tenant-invariant)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 **What if an AI agent chooses a resource ID that belongs to another customer?**
@@ -84,14 +86,20 @@ cargo test --all-targets
 
 ## Add it to a Rust application
 
-The crate is not on crates.io yet. Add the Git repository under `[dependencies]` in your application's `Cargo.toml`:
+Add the published crate to your application:
+
+```bash
+cargo add tenant-invariant
+```
+
+Or add it under `[dependencies]` in `Cargo.toml`:
 
 ```toml
 [dependencies]
-tenant-invariant = { git = "https://github.com/subaru-hello/tenant-invariant" }
+tenant-invariant = "0.1.0"
 ```
 
-Then run `cargo check` in your application. Cargo records the selected Git commit in `Cargo.lock`.
+Then run `cargo check` in your application. See the package on [crates.io](https://crates.io/crates/tenant-invariant) and the generated API documentation on [docs.rs](https://docs.rs/tenant-invariant).
 
 Call the check after resolving ownership on the server and immediately before the protected operation:
 
