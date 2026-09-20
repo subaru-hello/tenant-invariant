@@ -1,20 +1,103 @@
 # tenant-boundary-kit
 
-A minimal Rust library for checking a tenant boundary before an AI agent's tool call. It is an experimental starting point, **not** a complete authorization system.
+[![CI](https://github.com/subaru-hello/tenant-boundary-kit/actions/workflows/ci.yml/badge.svg)](https://github.com/subaru-hello/tenant-boundary-kit/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-The host application supplies two independently trusted facts: the tenant from an authenticated actor context, and the resource owner resolved by the server. The agent may propose a resource ID, but its text and tool arguments must not be used as the source of either trusted fact. An unknown owner is denied.
+**What if an AI agent chooses a resource ID that belongs to another customer?**
+
+`tenant-boundary-kit` is an experimental Rust library for making that boundary explicit before a tool call executes. The application supplies an authenticated actor and server-resolved resource ownership. The library allows same-tenant access and fails closed for cross-tenant or unknown ownership.
+
+It does not trust tenant IDs produced by the model.
 
 ```text
 agent proposes resource ID
-  -> server resolves resource owner
-  -> check_tenant(authenticated actor, resource owner)
+  -> server resolves the resource owner from a trusted source
+  -> tenant-boundary-kit compares actor and owner
   -> existing authorization and tenant-scoped data operation
 ```
 
-Run the cross-tenant example with `cargo run --example contract_lookup`. It prints `blocked: CrossTenant`. Run the tests with `cargo test`.
+## Try it in 30 seconds
 
-Run `cargo test --test scenarios` for seven usage scenarios: own-tenant and cross-tenant reads, unknown invoice ownership, a forged tenant claim in agent arguments, a mixed-tenant batch, and two documented gaps (write permission and ownership changing between check and fetch). The tests of those gaps pass because they demonstrate what this library does **not** enforce, not because the operations are safe.
+```bash
+git clone https://github.com/subaru-hello/tenant-boundary-kit.git
+cd tenant-boundary-kit
+cargo run --example contract_lookup
+```
 
-The current API checks only tenant equality. The caller must still enforce role and action permissions, authenticate the actor, and scope the actual database/API operation to the tenant. A separate ownership lookup followed by an unscoped fetch can race or bypass the check; use a tenant-scoped query or equivalent backend enforcement. Do not log raw prompts or tool arguments by default.
+The example represents an actor from `tenant-a` asking for a contract owned by `tenant-b`:
 
-The included property test generates different tenant IDs and checks that every cross-tenant pair is denied. It does not prove the security of an integrating application.
+```text
+blocked: CrossTenant
+```
+
+Run all tests with `cargo test`.
+
+## Use the library
+
+Until the crate is published, depend on the Git repository:
+
+```toml
+[dependencies]
+tenant-boundary-kit = { git = "https://github.com/subaru-hello/tenant-boundary-kit" }
+```
+
+Call the check after resolving ownership on the server, immediately before the protected operation:
+
+```rust
+use tenant_boundary_kit::{check_tenant, Actor, Decision, ResourceOwner, TenantId};
+
+let actor = Actor {
+    // Obtain this from authenticated application context, never model output.
+    tenant: TenantId::new("tenant-a")?,
+};
+
+// Resolve this from your database or trusted resource service.
+let owner = ResourceOwner::Tenant(TenantId::new("tenant-b")?);
+
+match check_tenant(&actor, &owner) {
+    Decision::Allow => {
+        // Perform your existing permission check and tenant-scoped operation.
+    }
+    Decision::Deny(_) => {
+        // Return a generic error externally; keep detailed reasons internal.
+    }
+}
+# Ok::<(), tenant_boundary_kit::InputError>(())
+```
+
+## Scenarios covered
+
+The test suite exercises:
+
+- same-tenant and cross-tenant contract reads;
+- unknown invoice ownership;
+- a forged tenant claim in agent-generated arguments;
+- a batch containing resources from multiple tenants;
+- randomly generated cross-tenant pairs.
+
+Run the integration scenarios separately with `cargo test --test scenarios`.
+
+## Security boundary and limitations
+
+This is a small experimental building block, **not a complete authorization system or a security guarantee**.
+
+It checks tenant equality only. The integrating application must still:
+
+- authenticate the actor;
+- authorize the requested action, such as read versus write;
+- resolve ownership from a trusted server-side source;
+- enforce tenant scoping in the database or downstream API;
+- avoid a separate check followed by an unscoped fetch, which can race or bypass the decision;
+- avoid logging raw prompts and tool arguments by default.
+
+The tests intentionally document two gaps: same-tenant writes require a separate permission check, and ownership can change between a separate lookup and fetch. Those tests demonstrate the boundary of this library; they do not make those operations safe.
+
+## Project status
+
+This project is looking for feedback from engineers building multi-tenant SaaS, MCP servers, and agent tool runtimes. Useful questions and real integration examples are welcome in [GitHub Issues](https://github.com/subaru-hello/tenant-boundary-kit/issues).
+
+Security concerns should be reported as described in [SECURITY.md](SECURITY.md).
+
+## License
+
+MIT
