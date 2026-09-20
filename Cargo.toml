@@ -1,10 +1,10 @@
 [package]
-name = "tenant-boundary-kit"
+name = "tenant-invariant"
 version = "0.1.0"
 edition = "2021"
-description = "Fail-closed tenant boundary checks for agent tool calls"
+description = "Executable tenant-isolation invariants for AI agent tool calls"
 license = "MIT"
-repository = "https://github.com/subaru-hello/tenant-boundary-kit"
+repository = "https://github.com/subaru-hello/tenant-invariant"
 readme = "README.md"
 keywords = ["ai-agent", "multitenancy", "authorization", "security"]
 categories = ["authentication", "development-tools"]

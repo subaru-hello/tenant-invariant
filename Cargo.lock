@@ -265,7 +265,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "tenant-boundary-kit"
+name = "tenant-invariant"
 version = "0.1.0"
 dependencies = [
  "proptest",

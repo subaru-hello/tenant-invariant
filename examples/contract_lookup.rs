@@ -1,4 +1,4 @@
-use tenant_boundary_kit::{check_tenant, Actor, Decision, ResourceOwner, TenantId};
+use tenant_invariant::{check_tenant, Actor, Decision, ResourceOwner, TenantId};
 
 struct Contract {
     id: &'static str,

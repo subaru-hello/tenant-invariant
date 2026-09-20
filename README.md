@@ -1,18 +1,18 @@
-# tenant-boundary-kit
+# TenantInvariant
 
-[![CI](https://github.com/subaru-hello/tenant-boundary-kit/actions/workflows/ci.yml/badge.svg)](https://github.com/subaru-hello/tenant-boundary-kit/actions/workflows/ci.yml)
+[![CI](https://github.com/subaru-hello/tenant-invariant/actions/workflows/ci.yml/badge.svg)](https://github.com/subaru-hello/tenant-invariant/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 **What if an AI agent chooses a resource ID that belongs to another customer?**
 
-`tenant-boundary-kit` is an experimental Rust library for making that boundary explicit before a tool call executes. The application supplies an authenticated actor and server-resolved resource ownership. The library allows same-tenant access and fails closed for cross-tenant or unknown ownership.
+`tenant-invariant` is an experimental Rust library for making tenant isolation an executable invariant before an AI agent's tool call executes. The application supplies an authenticated actor and server-resolved resource ownership. The library allows same-tenant access and fails closed for cross-tenant or unknown ownership.
 
 It does not trust tenant IDs produced by the model.
 
 ```text
 agent proposes resource ID
   -> server resolves the resource owner from a trusted source
-  -> tenant-boundary-kit compares actor and owner
+  -> TenantInvariant compares actor and owner
   -> existing authorization and tenant-scoped data operation
 ```
 
@@ -35,8 +35,8 @@ cargo --version
 Clone this repository:
 
 ```bash
-git clone https://github.com/subaru-hello/tenant-boundary-kit.git
-cd tenant-boundary-kit
+git clone https://github.com/subaru-hello/tenant-invariant.git
+cd tenant-invariant
 ```
 
 No database, API key, model provider, or external service is required for the included example.
@@ -47,7 +47,7 @@ Run the cross-tenant example:
 
 ```console
 $ cargo run --example contract_lookup
-   Compiling tenant-boundary-kit v0.1.0
+   Compiling tenant-invariant v0.1.0
     Finished `dev` profile
      Running `target/debug/examples/contract_lookup`
 blocked: CrossTenant
@@ -88,7 +88,7 @@ The crate is not on crates.io yet. Add the Git repository under `[dependencies]`
 
 ```toml
 [dependencies]
-tenant-boundary-kit = { git = "https://github.com/subaru-hello/tenant-boundary-kit" }
+tenant-invariant = { git = "https://github.com/subaru-hello/tenant-invariant" }
 ```
 
 Then run `cargo check` in your application. Cargo records the selected Git commit in `Cargo.lock`.
@@ -96,7 +96,7 @@ Then run `cargo check` in your application. Cargo records the selected Git commi
 Call the check after resolving ownership on the server and immediately before the protected operation:
 
 ```rust
-use tenant_boundary_kit::{check_tenant, Actor, Decision, ResourceOwner, TenantId};
+use tenant_invariant::{check_tenant, Actor, Decision, ResourceOwner, TenantId};
 
 fn main() {
     let actor = Actor {
@@ -171,7 +171,7 @@ The tests intentionally document two gaps: same-tenant writes require a separate
 
 ## Project status
 
-This project is looking for feedback from engineers building multi-tenant SaaS, MCP servers, and agent tool runtimes. Useful questions and real integration examples are welcome in [GitHub Issues](https://github.com/subaru-hello/tenant-boundary-kit/issues).
+This project is looking for feedback from engineers building multi-tenant SaaS, MCP servers, and agent tool runtimes. Useful questions and real integration examples are welcome in [GitHub Issues](https://github.com/subaru-hello/tenant-invariant/issues).
 
 Security concerns should be reported as described in [SECURITY.md](SECURITY.md).
 
